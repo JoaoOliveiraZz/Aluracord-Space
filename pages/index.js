@@ -1,37 +1,12 @@
 import appConfig from '../config.json'
 import { Box, Button, Text, TextField, Image} from '@skynexui/components'
+import {useRouter} from "next/router"
+import React from 'react'
 
-function GlobalStyle() {
-    return (
-      <style global jsx>{`
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-          list-style: none;
-        }
-        body {
-          font-family: 'Open Sans', sans-serif;
-        }
-        /* App fit Height */ 
-        html, body, #__next {
-          min-height: 100vh;
-          display: flex;
-          flex: 1;
-        }
-        #__next {
-          flex: 1;
-        }
-        #__next > * {
-          flex: 1;
-        }
-        /* ./App fit Height */ 
-      `}</style>
-    );
-  }
+
+
 
 function Titulo(props){
-    console.log(props.children);
 
     const Tag = props.tag || 'h1';
     return(
@@ -45,6 +20,9 @@ function Titulo(props){
         </>
     );
 }
+
+
+
 
 // function HomePage(){
 
@@ -61,16 +39,39 @@ function Titulo(props){
 // export default HomePage
 
 export default function PaginaInicial() {
-    const username = 'JoaoOliveiraZz';
+    // const username = 'JoaoOliveiraZz';
+    const [username, setUsername] = React.useState('JoaoOliveiraZz');
+    const [userlocation, setLocation] = React.useState('Minas Gerais, Brasil');
+    const [userFollowers, setFollowers] = React.useState('1');
+
+    const Roteamento = useRouter();
+    // const Dados = {
+    //     Nome: username,
+    //     Localidade: '',
+    //     Seguidores: ''
+    // }
+    function UserData(dados){
+        if(dados.location == undefined){
+            setLocation('Sem localização')
+        }else{
+            setLocation(dados.location);
+        }
+        if(dados.followers == undefined){
+            setFollowers('0');
+        }else{
+            setFollowers(`Followers: ${dados.followers}`)
+        }
+    }
+    
   
     return (
       <>
-        <GlobalStyle />
+      
         <Box
           styleSheet={{
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            backgroundColor: appConfig.theme.colors.primary[500],
-            backgroundImage: 'url(https://virtualbackgrounds.site/wp-content/uploads/2020/08/the-matrix-digital-rain.jpg)',
+            //backgroundColor: appConfig.theme.colors.primary[500],
+            backgroundImage: 'url(https://wallpaperaccess.com/full/1145427.jpg)',
             backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundBlendMode: 'multiply',
           }}
         >
@@ -92,17 +93,37 @@ export default function PaginaInicial() {
             {/* Formulário */}
             <Box
               as="form"
+              onSubmit = {(evento) => {
+                evento.preventDefault();
+                //   window.location.href = '/chat' Forma antiga de mudar a página, ainda funciona, porém ela da refresh na página
+                Roteamento.push('/chat'); //Dessa forma não da refresh
+              }}
               styleSheet={{
                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                 width: { xs: '100%', sm: '50%' }, textAlign: 'center', marginBottom: '32px',
               }}
             >
-              <Titulo tag="h2">Boas vindas de volta!</Titulo>
+              <Titulo tag="h2">Saudações, viajante</Titulo>
               <Text variant="body3" styleSheet={{ marginBottom: '32px', color: appConfig.theme.colors.neutrals[300] }}>
                 {appConfig.name}
               </Text>
   
               <TextField
+                value = {username}
+                onChange = { (event) => {
+                    const valor = event.target.value;
+                    setUsername(valor);
+                }}
+                onBlur = {(event) => {
+                    let url = `https://api.github.com/users/${username}`
+                    fetch(url).then((response) => {
+                        response.json().then((data)=>{
+                            console.log('Chamou');
+                            UserData(data);
+                        })
+                    })
+                }}
+                placeholder = 'GitHub user'
                 fullWidth
                 textFieldColors={{
                   neutral: {
@@ -111,6 +132,7 @@ export default function PaginaInicial() {
                     mainColorHighlight: appConfig.theme.colors.primary[500],
                     backgroundColor: appConfig.theme.colors.neutrals[800],
                   },
+
                 }}
               />
               <Button
@@ -121,7 +143,7 @@ export default function PaginaInicial() {
                   contrastColor: appConfig.theme.colors.neutrals["000"],
                   mainColor: appConfig.theme.colors.primary[500],
                   mainColorLight: appConfig.theme.colors.primary[400],
-                  mainColorStrong: appConfig.theme.colors.primary[600],
+                  mainColorStrong: appConfig.theme.colors.primary[700],
                 }}
               />
             </Box>
@@ -157,10 +179,38 @@ export default function PaginaInicial() {
                   color: appConfig.theme.colors.neutrals[200],
                   backgroundColor: appConfig.theme.colors.neutrals[900],
                   padding: '3px 10px',
-                  borderRadius: '1000px'
+                  borderRadius: '1000px',
+                  marginBottom: '3px'
                 }}
               >
                 {username}
+                {/* {Dados.Localidade}
+                {Dados.Seguidores} */}
+              </Text>
+              <Text
+                variant="body4"
+                styleSheet={{
+                  color: appConfig.theme.colors.neutrals[200],
+                  backgroundColor: appConfig.theme.colors.neutrals[900],
+                  padding: '3px 10px',
+                  borderRadius: '1000px',
+                  marginBottom: '3px'
+                }}
+              >
+                {userlocation}
+               
+              </Text>
+              <Text
+                variant="body4"
+                styleSheet={{
+                  color: appConfig.theme.colors.neutrals[200],
+                  backgroundColor: appConfig.theme.colors.neutrals[900],
+                  padding: '3px 10px',
+                  borderRadius: '1000px'
+                }}
+              >
+                {userFollowers}
+               
               </Text>
             </Box>
             {/* Photo Area */}
